@@ -5,20 +5,34 @@ import Library from "@/app/components/library";
 import React from "react";
 
 export default function Home() {
-    const [images, setImages] = React.useState<string[]>(() => {
-        if (typeof window !== "undefined") {
-            const storedImages = localStorage.getItem("uploaded-images");
-            return storedImages ? JSON.parse(storedImages) : [];
-        }
-        return [];
-    });
-
+    const [images, setImages] = React.useState<string[]>([]);    
+    const [isClient, setIsClient] = React.useState(false);
+    
     React.useEffect(() => {
-        localStorage.setItem("uploaded-images", JSON.stringify(images));
-    }, [images]);
+        setIsClient(true);
+    }, []);
+    
+    React.useEffect(() => {
+        if (isClient) {
+            const storedImages = localStorage.getItem("uploaded-images");
+            if (storedImages) {
+                setImages(JSON.parse(storedImages));
+            }
+        }
+    }, [isClient]);
+    
+    React.useEffect(() => {
+        if (isClient) {
+            localStorage.setItem("uploaded-images", JSON.stringify(images));
+        }
+    }, [images, isClient]);
 
     const handleImageUpload = (imageData: string) => {
         setImages(prev => [...prev, imageData]);
+    };
+
+    const handleDeleteImage = (imageToDelete: string) => {
+        setImages(prev => prev.filter(image => image !== imageToDelete));
     };
 
     return (
@@ -30,9 +44,10 @@ export default function Home() {
                     onSelectImage={(imageUrl) => {
                         setImages((prev) => [...prev, imageUrl]);
                     }}
-                    className="inset-0 w-full h-full"
+                    onDeleteImage={handleDeleteImage}
+                    className="absolute inset-0 w-full h-full"
                 />
-                <div className="absolute inset-0 flex items-center justify-center z-10">
+                <div className="absolute bottom-4 left-1/2 transform -translate-x-1/2 z-10">
                     <ImageUploader onUpload={handleImageUpload} />
                 </div>
             </div>

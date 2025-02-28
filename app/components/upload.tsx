@@ -81,7 +81,8 @@ export default function ImageUploader({ onUpload }: ImageUploaderProps) {
 						onClick={triggerFileInput}
 						variant="secondary"
 						size="sm"
-						className="mt-2 bg-purple-600 text-white hover:bg-purple-700 active:bg-purple-800"
+						className="mt-2 bg-purple-600 text-white hover:bg-purple-700 active:bg-purple-800
+							cursor-pointer"
 					>
 						<Upload className="mr-1 h-3 w-3" />
 						Browse
