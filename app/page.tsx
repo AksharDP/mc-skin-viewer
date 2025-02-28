@@ -53,43 +53,56 @@ export default function Home() {
             loadImages();
         }
     }, [isClient]);
-    
-    React.useEffect(() => {
-        if (isClient && dbPromise && images.length > 0) {
-            const saveImages = async () => {
-                try {
-                    if (!dbPromise) {
-                        console.error("Database not initialized");
-                        return;
-                    }
-                    
-                    const db = await dbPromise;
-                    const tx = db.transaction('images', 'readwrite');
-                    const store = tx.objectStore('images');
-                    
-                    await store.clear();
-                    
-                    for (const image of images) {
-                        await store.add(image);
-                    }
-                    
-                    await tx.done;
-                } catch (error) {
-                    console.error("Failed to save images to IndexedDB:", error);
-                    alert("Error saving images. Please try again or delete some images.");
-                }
-            };
-            saveImages();
-        }
-    }, [images, isClient]);
 
-    const handleImageUpload = (base64Image: string) => {
-        setImages(prev => [...prev, { data: base64Image }]);
-    };
-
-    const handleDeleteImage = (imageToDelete: string) => {
-        setImages(prev => prev.filter(image => image.data !== imageToDelete));
-    };
+	const handleImageUpload = async (base64Image: string) => {
+		try {
+			if (!dbPromise) {
+				console.error("Database not initialized");
+				return;
+			}
+			
+			// First, add to IndexedDB
+			const db = await dbPromise;
+			const tx = db.transaction('images', 'readwrite');
+			const store = tx.objectStore('images');
+			
+            // Add the new image
+            const id = await store.add({ data: base64Image });
+            await tx.done;
+            
+            // Then update state with the ID from the database, converting to number type
+            setImages(prev => [...prev, { id: typeof id === 'number' ? id : undefined, data: base64Image }]);
+		} catch (error) {
+			console.error("Failed to save image to IndexedDB:", error);
+		}
+	};
+	
+	const handleDeleteImage = async (imageToDelete: string) => {
+		try {
+			if (!dbPromise) {
+				console.error("Database not initialized");
+				return;
+			}
+			
+			// First, find the image in IndexedDB
+			const db = await dbPromise;
+			const allImages = await db.getAll('images');
+			const imageToRemove = allImages.find(img => img.data === imageToDelete);
+			
+			if (imageToRemove?.id) {
+				// Delete from IndexedDB
+				const tx = db.transaction('images', 'readwrite');
+				const store = tx.objectStore('images');
+				await store.delete(imageToRemove.id);
+				await tx.done;
+				
+				// Then update state
+				setImages(prev => prev.filter(image => image.data !== imageToDelete));
+			}
+		} catch (error) {
+			console.error("Failed to delete image from IndexedDB:", error);
+		}
+	};
 
     const handleImageClick = (imageUrl: string) => {
         console.log(imageUrl);

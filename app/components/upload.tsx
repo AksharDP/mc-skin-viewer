@@ -6,37 +6,99 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Upload, UploadCloud } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { toast } from "sonner";
+
+interface ValidationResult {
+    isValid: boolean;
+    errors: string[];
+}
 
 interface ImageUploaderProps {
-    onUpload: (imagePath: string) => void;
+    onUpload: (base64Image: string) => void;
 }
 
 export default function ImageUploader({ onUpload }: ImageUploaderProps) {
     const [isDragging, setIsDragging] = useState(false);
     const fileInputRef = useRef<HTMLInputElement>(null);
 
-    const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const validateImageDimensions = (file: File): Promise<ValidationResult> => {
+        return new Promise((resolve) => {
+            const img = new Image();
+            img.onload = () => {
+                const errors: string[] = [];
+                
+                // Check if image is square (1:1 aspect ratio)
+                const isSquare = img.width === img.height;
+                if (!isSquare) {
+                    errors.push(`Wrong aspect ratio: ${file.name} (${img.width}x${img.height})`);
+                }
+                
+                // Check if exactly 64x64
+                const isSkin = img.width === 64 && img.height === 64;
+                if (!isSkin) {
+                    errors.push(`Wrong image size: ${file.name} (${img.width}x${img.height}, should be 64x64)`);
+                }
+                
+                // Only resolve once with complete validation result
+                resolve({
+                    isValid: isSquare && isSkin,
+                    errors
+                });
+                
+                URL.revokeObjectURL(img.src);
+            };
+            
+            img.onerror = () => {
+                resolve({
+                    isValid: false,
+                    errors: [`Failed to load image: ${file.name}`]
+                });
+                URL.revokeObjectURL(img.src);
+            };
+            
+            img.src = URL.createObjectURL(file);
+        });
+    };
+
+    const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
         if (e.target.files) {
-            processFiles(e.target.files);
+            await processFiles(e.target.files);
+            e.target.value = '';
         }
     };
 
     const processFiles = async (fileList: FileList) => {
-		for (let i = 0; i < fileList.length; i++) {
-			const file = fileList[i];
-			if (!file.type.startsWith("image/")) continue;
-	
-			const reader = new FileReader();
-			reader.onload = (e) => {
-				if (e.target?.result) {
-					onUpload(e.target.result.toString());
-				}
-			};
-			
-			reader.readAsDataURL(file);
-		}
-	};
+        for (let i = 0; i < fileList.length; i++) {
+            const file = fileList[i];
+            if (!file.type.startsWith("image/")) {
+                toast.error(`Not an image file: ${file.name}`);
+                continue;
+            }
+            
+            // Validate dimensions
+            const validation = await validateImageDimensions(file);
+            
+            if (!validation.isValid) {
+                // Show each error as a separate toast
+                validation.errors.forEach(error => {
+                    toast.error(error);
+                });
+                continue;
+            }
+            
+            // Convert to base64
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                if (e.target?.result) {
+                    onUpload(e.target.result.toString());
+                    toast.success(`${file.name} uploaded successfully`);
+                }
+            };
+            reader.readAsDataURL(file);
+        }
+    };
 
+    // Rest of your code remains the same
     const handleDragOver = (e: React.DragEvent) => {
         e.preventDefault();
         setIsDragging(true);
@@ -47,12 +109,12 @@ export default function ImageUploader({ onUpload }: ImageUploaderProps) {
         setIsDragging(false);
     };
 
-    const handleDrop = (e: React.DragEvent) => {
+    const handleDrop = async (e: React.DragEvent) => {
         e.preventDefault();
         setIsDragging(false);
 
         if (e.dataTransfer.files) {
-            processFiles(e.dataTransfer.files);
+            await processFiles(e.dataTransfer.files);
         }
     };
 
@@ -64,18 +126,18 @@ export default function ImageUploader({ onUpload }: ImageUploaderProps) {
         <div className="min-w-36 max-w-96 flex items-end justify-center h-full w-full">
             <Card
                 className={cn(
-                    "border-2 border-dashed mb-6 bg-black",
+                    "border-2 border-dashed bg-black",
                     isDragging ? "border-purple-500 bg-muted/20" : "border-white"
                 )}
                 onDragOver={handleDragOver}
                 onDragLeave={handleDragLeave}
                 onDrop={handleDrop}
             >
-                <CardContent className="flex flex-col items-center">
+                <CardContent className="flex flex-col items-center p-4">
                     <div className="flex items-center">
                         <UploadCloud className="h-5 w-5 mr-3 text-white" />
                         <p className="text-xs text-white">
-                            Drag and drop skin files or select files
+                            Drag and drop Minecraft skin files (64x64)
                         </p>
                     </div>
                     <Button
@@ -91,7 +153,7 @@ export default function ImageUploader({ onUpload }: ImageUploaderProps) {
                     <Input
                         ref={fileInputRef}
                         type="file"
-                        accept="image/*"
+                        accept="image/png,image/jpeg,image/jpg,image/webp"
                         multiple
                         className="hidden"
                         onChange={handleFileChange}
