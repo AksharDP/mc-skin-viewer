@@ -27,19 +27,16 @@ export default function ImageUploader({ onUpload }: ImageUploaderProps) {
             img.onload = () => {
                 const errors: string[] = [];
                 
-                // Check if image is square (1:1 aspect ratio)
                 const isSquare = img.width === img.height;
                 if (!isSquare) {
                     errors.push(`Wrong aspect ratio: ${file.name} (${img.width}x${img.height})`);
                 }
                 
-                // Check if exactly 64x64
                 const isSkin = img.width === 64 && img.height === 64;
                 if (!isSkin) {
                     errors.push(`Wrong image size: ${file.name} (${img.width}x${img.height}, should be 64x64)`);
                 }
-                
-                // Only resolve once with complete validation result
+
                 resolve({
                     isValid: isSquare && isSkin,
                     errors
@@ -75,18 +72,15 @@ export default function ImageUploader({ onUpload }: ImageUploaderProps) {
                 continue;
             }
             
-            // Validate dimensions
             const validation = await validateImageDimensions(file);
             
             if (!validation.isValid) {
-                // Show each error as a separate toast
                 validation.errors.forEach(error => {
                     toast.error(error);
                 });
                 continue;
             }
             
-            // Convert to base64
             const reader = new FileReader();
             reader.onload = (e) => {
                 if (e.target?.result) {
@@ -98,7 +92,6 @@ export default function ImageUploader({ onUpload }: ImageUploaderProps) {
         }
     };
 
-    // Rest of your code remains the same
     const handleDragOver = (e: React.DragEvent) => {
         e.preventDefault();
         setIsDragging(true);

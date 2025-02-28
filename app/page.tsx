@@ -61,16 +61,12 @@ export default function Home() {
 				return;
 			}
 			
-			// First, add to IndexedDB
 			const db = await dbPromise;
 			const tx = db.transaction('images', 'readwrite');
 			const store = tx.objectStore('images');
-			
-            // Add the new image
-            const id = await store.add({ data: base64Image });
+
+			const id = await store.add({ data: base64Image });
             await tx.done;
-            
-            // Then update state with the ID from the database, converting to number type
             setImages(prev => [...prev, { id: typeof id === 'number' ? id : undefined, data: base64Image }]);
 		} catch (error) {
 			console.error("Failed to save image to IndexedDB:", error);
@@ -84,19 +80,16 @@ export default function Home() {
 				return;
 			}
 			
-			// First, find the image in IndexedDB
 			const db = await dbPromise;
 			const allImages = await db.getAll('images');
 			const imageToRemove = allImages.find(img => img.data === imageToDelete);
 			
 			if (imageToRemove?.id) {
-				// Delete from IndexedDB
 				const tx = db.transaction('images', 'readwrite');
 				const store = tx.objectStore('images');
 				await store.delete(imageToRemove.id);
 				await tx.done;
 				
-				// Then update state
 				setImages(prev => prev.filter(image => image.data !== imageToDelete));
 			}
 		} catch (error) {
