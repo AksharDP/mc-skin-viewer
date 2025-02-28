@@ -12,7 +12,7 @@ interface LibraryProps {
 const Library: React.FC<LibraryProps> = ({ images, onSelectImage, onDeleteImage, className }) => {
 	return (
 		<div className={`library-container h-full overflow-y-auto ${className || ''}`}>
-			<div className="grid grid-cols-5 gap-2.5 p-2.5">
+			<div className="grid grid-cols-5 gap-2.5 p-2.5 mb-40">
 				{images.map((imageUrl, index) => (
 					<div key={index} className="image-item">
 						<div className="cursor-pointer"	onClick={() => onSelectImage?.(imageUrl)}>
