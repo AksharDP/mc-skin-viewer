@@ -76,46 +76,34 @@ export default function ImageUploader() {
   // const removeFile = (id: string) => {
   //     setUploadedFiles(uploadedFiles.filter(file => file.id !== id));
   // };
-
-  return (
+    return (
     <div className="min-w-36 max-w-96 flex items-end justify-center h-full w-full">
-      <Card
-        className={cn(
-          "border-2 border-dashed transition-colors mb-6",
-          isDragging
-            ? "border-primary bg-muted/20"
-            : "border-muted-foreground/25"
-        )}
-        onDragOver={handleDragOver}
-        onDragLeave={handleDragLeave}
-        onDrop={handleDrop}
-      >
-        <CardContent className="flex flex-col items-center">
-          <div className="flex items-center">
-            <UploadCloud className="h-5 w-5 text-muted-foreground mr-3" />
-            <p className="text-xs text-muted-foreground">
-              Drag and drop skin files or select files
-            </p>
-          </div>
-          <Button
-            onClick={triggerFileInput}
-            variant="secondary"
-            size="sm"
-            className="bg-purple"
-          >
-            <Upload className="mr-1 h-3 w-3" />
-            Browse
-          </Button>
-          <Input
-            ref={fileInputRef}
-            type="file"
-            accept="image/*"
-            multiple
-            className="hidden"
-            onChange={handleFileChange}
-          />
-        </CardContent>
-      </Card>
+        <Card
+            className={cn(
+                "border-2 border-dashed mb-6 bg-black",
+                isDragging
+                    ? "border-purple-500 bg-muted/20"
+                    : "border-white"
+            )} 
+            onDragOver={handleDragOver} 
+            onDragLeave={handleDragLeave} 
+            onDrop={handleDrop}
+        >
+            <CardContent className="flex flex-col items-center">
+                <div className="flex items-center">
+                    <UploadCloud className="h-5 w-5 mr-3 text-white" />
+                    <p className="text-xs text-white">
+                        Drag and drop skin files or select files
+                    </p>
+                </div>
+                <Button onClick={triggerFileInput} variant="secondary" size="sm" className="mt-2 bg-purple-600 text-white
+                    hover:bg-purple-700 active:bg-purple-800">
+                    <Upload className="mr-1 h-3 w-3" />Browse
+                </Button>
+                <Input ref={fileInputRef} type="file" accept="image/*" multiple className="hidden" 
+                    onChange={handleFileChange} />
+            </CardContent>
+        </Card>
     </div>
-  );
+    );
 }
