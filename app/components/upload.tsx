@@ -126,7 +126,7 @@ export default function ImageUploader({ onUpload }: ImageUploaderProps) {
                 onDragLeave={handleDragLeave}
                 onDrop={handleDrop}
             >
-                <CardContent className="flex flex-col items-center p-4">
+                <CardContent className="flex flex-col items-center px-4">
                     <div className="flex items-center">
                         <UploadCloud className="h-5 w-5 mr-3 text-white" />
                         <p className="text-xs text-white">

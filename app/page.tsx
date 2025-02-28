@@ -4,6 +4,7 @@ import ImageUploader from "@/app/components/upload";
 import Library from "@/app/components/library";
 import React from "react";
 import { openDB, IDBPDatabase } from 'idb';
+import { toast } from "sonner";
 
 let dbPromise: IDBPDatabase | null = null;
 
@@ -37,6 +38,7 @@ export default function Home() {
             const loadImages = async () => {
                 try {
                     if (!dbPromise) {
+						toast.error("Error: Refresh page to try again");
                         console.error("Database not initialized");
                         return;
                     }
@@ -57,6 +59,7 @@ export default function Home() {
 	const handleImageUpload = async (base64Image: string) => {
 		try {
 			if (!dbPromise) {
+				toast.error("Error: Refresh page to try again");
 				console.error("Database not initialized");
 				return;
 			}
@@ -76,6 +79,7 @@ export default function Home() {
 	const handleDeleteImage = async (imageToDelete: string) => {
 		try {
 			if (!dbPromise) {
+				toast.error("Error: Refresh page to try again");
 				console.error("Database not initialized");
 				return;
 			}
