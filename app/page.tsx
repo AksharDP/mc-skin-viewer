@@ -2,18 +2,18 @@
 
 import ImageUploader from "@/app/components/upload";
 import Library from "@/app/components/library";
+import MinecraftSkinViewer from "@/app/components/skinviewer";
 import React from "react";
 import { openDB, IDBPDatabase } from 'idb';
 import { toast } from "sonner";
 
 let dbPromise: IDBPDatabase | null = null;
 
-
 export default function Home() {
-	
     const [images, setImages] = React.useState<Array<{id?: number, data: string}>>([]);    
     const [isClient, setIsClient] = React.useState(false);
-    
+	const [selectedSkin, setSelectedSkin] = React.useState<string | undefined>(undefined);
+
     React.useEffect(() => {
         const initializeDb = async () => {
             try {
@@ -64,8 +64,7 @@ export default function Home() {
 				return;
 			}
 			
-			const db = await dbPromise;
-			const tx = db.transaction('images', 'readwrite');
+			const tx = dbPromise.transaction('images', 'readwrite');
 			const store = tx.objectStore('images');
 
 			const id = await store.add({ data: base64Image });
@@ -84,12 +83,11 @@ export default function Home() {
 				return;
 			}
 			
-			const db = await dbPromise;
-			const allImages = await db.getAll('images');
+			const allImages = await dbPromise.getAll('images');
 			const imageToRemove = allImages.find(img => img.data === imageToDelete);
 			
 			if (imageToRemove?.id) {
-				const tx = db.transaction('images', 'readwrite');
+				const tx = dbPromise.transaction('images', 'readwrite');
 				const store = tx.objectStore('images');
 				await store.delete(imageToRemove.id);
 				await tx.done;
@@ -102,25 +100,36 @@ export default function Home() {
 	};
 
     const handleImageClick = (imageUrl: string) => {
-        console.log(imageUrl);
+		console.log("Selected skin: ", imageUrl);
+        setSelectedSkin(imageUrl);
     };
 
     return (
-        <main className="flex flex-row items-center justify-center gap-2 h-screen p-4 bg-black">
-            <div className="flex flex-col w-[30%] h-full items-center justify-center border-dashed border-2 rounded-l-xl"></div>
-            <div className="flex w-[70%] h-full items-center justify-center border-dashed border-2 rounded-r-xl relative">
-                <Library
-                    images={images.map(img => img.data)}
-                    onSelectImage={(imageUrl) => {
-                        handleImageClick(imageUrl);
-                    }}
-                    onDeleteImage={handleDeleteImage}
-                    className="absolute inset-0 w-full h-full"
-                />
-                <div className="absolute bottom-4 left-1/2 transform -translate-x-1/2 z-10">
-                    <ImageUploader onUpload={handleImageUpload} />
-                </div>
-            </div>
-        </main>
-    );
+		<main className="flex flex-col md:flex-row items-center justify-center gap-2 h-screen p-4 bg-black">
+			<div className="md:w-[30%] w-full h-[40vh] md:h-full flex flex-col items-center justify-center border-dashed border-2 rounded-md md:rounded-l-xl relative">
+				<div className="absolute inset-0 w-full h-full p-4">
+					<MinecraftSkinViewer 
+						skinUrl={selectedSkin}
+						className="rounded-md overflow-hidden"
+					/>
+				</div>
+				{!selectedSkin && (
+					<p className="text-white mt-4 relative z-10">Select a skin from the library</p>
+				)}
+			</div>
+			<div className="md:w-[70%] w-full h-[60vh] md:h-full flex items-center justify-center border-dashed border-2 rounded-md md:rounded-r-xl relative">
+				<Library
+					images={images.map(img => img.data)}
+					onSelectImage={(imageUrl) => {
+						handleImageClick(imageUrl);
+					}}
+					onDeleteImage={handleDeleteImage}
+					className="absolute inset-0 w-full h-full"
+				/>
+				<div className="absolute bottom-4 left-1/2 transform -translate-x-1/2 z-10">
+					<ImageUploader onUpload={handleImageUpload} />
+				</div>
+			</div>
+		</main>
+	);
 }
