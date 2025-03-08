@@ -106,7 +106,7 @@ export default function Home() {
 
     return (
 		<main className="flex flex-col md:flex-row items-center justify-center gap-2 h-screen p-4 bg-black">
-			<div className="md:w-[30%] w-full h-[40vh] md:h-full flex flex-col items-center justify-center border-dashed border-2 rounded-md md:rounded-l-xl relative">
+			<div className="md:w-[30%] w-full h-[40vh] md:h-full flex flex-col items-center justify-center border-1 border-white rounded-md md:rounded-l-xl relative">
 				<div className="absolute inset-0 w-full h-full p-4">
 					<MinecraftSkinViewer 
 						skinUrl={selectedSkin}
@@ -117,7 +117,7 @@ export default function Home() {
 					<p className="text-white mt-4 relative z-10">Select a skin from the library</p>
 				)}
 			</div>
-			<div className="md:w-[70%] w-full h-[60vh] md:h-full flex items-center justify-center border-dashed border-2 rounded-md md:rounded-r-xl relative">
+			<div className="md:w-[70%] w-full h-[60vh] md:h-full flex items-center justify-center border-1 border-white rounded-md md:rounded-r-xl relative">
 				<Library
 					images={images.map(img => img.data)}
 					onSelectImage={(imageUrl) => {
