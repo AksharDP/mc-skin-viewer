@@ -105,7 +105,24 @@ export default function Home() {
         setSelectedSkin(imageUrl);
     };
 
-	// Function to get cookie value by name
+	const handleDownloadImage = (imageUrl: string) => {
+		const byteString = atob(imageUrl.split(',')[1]);
+		const mimeString = imageUrl.split(',')[0].split(':')[1].split(';')[0];
+		const ab = new ArrayBuffer(byteString.length);
+		const ia = new Uint8Array(ab);
+		for (let i = 0; i < byteString.length; i++) {
+			ia[i] = byteString.charCodeAt(i);
+		}
+		const blob = new Blob([ab], { type: mimeString });
+		const link = document.createElement("a");
+		link.href = URL.createObjectURL(blob);
+		link.download = "skin.png";
+		document.body.appendChild(link);
+		link.click();
+		document.body.removeChild(link);
+		URL.revokeObjectURL(link.href);
+	};
+
 	const getCookie = (name: string): string | null => {
 		const match = document.cookie.match(new RegExp('(^| )' + name + '=([^;]+)'));
 		if (match) return match[2];
@@ -162,6 +179,7 @@ export default function Home() {
 						handleImageClick(imageUrl);
 					}}
 					onDeleteImage={handleDeleteImage}
+					onDownloadImage={handleDownloadImage}
 					className="absolute inset-0 w-full h-full"
 				/>
 				<div className="absolute bottom-4 left-1/2 transform -translate-x-1/2 z-10">

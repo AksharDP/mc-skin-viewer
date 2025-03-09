@@ -7,9 +7,10 @@ interface ImageItemProps {
     index: number;
     onSelectImage?: (imageUrl: string) => void;
     onDeleteImage?: (imageName: string) => void;
+	onDownloadImage?: (imageUrl: string) => void;
 }
 
-const ImageItem = memo(({ imageUrl, index, onSelectImage, onDeleteImage }: ImageItemProps) => {
+const ImageItem = memo(({ imageUrl, index, onSelectImage, onDeleteImage, onDownloadImage }: ImageItemProps) => {
     const [isLoading, setIsLoading] = useState(true);
     const [isHovering, setIsHovering] = useState(false);
     
@@ -45,8 +46,24 @@ const ImageItem = memo(({ imageUrl, index, onSelectImage, onDeleteImage }: Image
                 </div>
             </div>
             
-            <div className="flex justify-center py-2 bg-gray-800 border-gray-600 border-t-2">
-                <Button 
+            <div className="flex justify-center py-2 bg-gray-800 border-gray-600 border-t-2 gap-1">
+				<Button 
+					className="bg-purple-600 hover:bg-purple-700 active:bg-purple-800 text-white text-xs px-3 py-1
+						transition-all duration-200 hover:shadow-md hover:shadow-purple-900/30 hover:cursor-pointer"
+					onClick={(e) => {
+						e.stopPropagation();
+						onDownloadImage?.(imageUrl);
+					}}
+				>
+					<Image
+						src="/download-icon.svg"
+						alt="Download"
+						width={16}
+						height={16}
+						className="h-4 w-4"
+					/>
+				</Button>
+				<Button 
                     className="bg-purple-600 hover:bg-purple-700 active:bg-purple-800 text-white text-xs px-4 py-1
                         transition-all duration-200 hover:shadow-md hover:shadow-purple-900/30 hover: cursor-pointer"
                     onClick={(e) => {
