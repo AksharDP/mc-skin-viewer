@@ -133,7 +133,7 @@ export default function Home() {
 				<div className="fixed top-0 left-0 w-full bg-blue-600 text-white py-2 px-4 text-center z-50 shadow-md">
 					All images are stored locally in your browser. They will be deleted if you clear your browser data.
 					<button 
-						className="ml-4 px-2 py-0.5 bg-blue-700 rounded hover:bg-blue-800"
+						className="ml-4 px-2 py-0.5 bg-blue-700 rounded hover:bg-blue-800 hover:cursor-pointer"
 						onClick={() => {
 							setNotificationClosed(true);
 							setCookie('notificationShown', 'true');
