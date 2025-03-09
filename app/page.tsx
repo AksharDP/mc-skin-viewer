@@ -13,6 +13,7 @@ export default function Home() {
     const [images, setImages] = React.useState<Array<{id?: number, data: string}>>([]);    
     const [isClient, setIsClient] = React.useState(false);
 	const [selectedSkin, setSelectedSkin] = React.useState<string | undefined>(undefined);
+	const [notificationClosed, setNotificationClosed] = React.useState(true);
 
     React.useEffect(() => {
         const initializeDb = async () => {
@@ -104,8 +105,45 @@ export default function Home() {
         setSelectedSkin(imageUrl);
     };
 
-    return (
+	// Function to get cookie value by name
+	const getCookie = (name: string): string | null => {
+		const match = document.cookie.match(new RegExp('(^| )' + name + '=([^;]+)'));
+		if (match) return match[2];
+		return null;
+	};
+
+	const setCookie = (name: string, value: string, days: number = 365): void => {
+		const date = new Date();
+		date.setTime(date.getTime() + days * 24 * 60 * 60 * 1000);
+		document.cookie = `${name}=${value};expires=${date.toUTCString()};path=/`;
+	};
+	
+	React.useEffect(() => {
+		if (typeof document !== 'undefined') {
+			const notificationShown = getCookie('notificationShown');
+			if (!notificationShown) {
+				setNotificationClosed(false);
+			}
+		}
+	}, []);
+
+	return (
 		<main className="flex flex-col md:flex-row items-center justify-center gap-2 h-screen p-4 bg-black">
+			{!notificationClosed && (
+				<div className="fixed top-0 left-0 w-full bg-blue-600 text-white py-2 px-4 text-center z-50 shadow-md">
+					All images are stored locally in your browser. They will be deleted if you clear your browser data.
+					<button 
+						className="ml-4 px-2 py-0.5 bg-blue-700 rounded hover:bg-blue-800"
+						onClick={() => {
+							setNotificationClosed(true);
+							setCookie('notificationShown', 'true');
+						}}
+					>
+						✕
+					</button>
+				</div>
+			)}
+			
 			<div className="md:w-[30%] w-full h-[40vh] md:h-full flex flex-col items-center justify-center border-1 border-white rounded-md md:rounded-l-xl relative">
 				<div className="absolute inset-0 w-full h-full p-4">
 					<MinecraftSkinViewer 
